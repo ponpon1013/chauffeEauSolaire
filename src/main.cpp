@@ -1,7 +1,13 @@
 #include <Arduino.h>
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h> 
 
 void setup() {
-  // put your setup code here, to run once:
+  //WiFiManager
+    //Local intialization. Once its business is done, there is no need to keep it around
+    WiFiManager wifiManager;
+    wifiManager.autoConnect("ChauffeEauConnectAP");
 }
 
 void loop() {
