@@ -3,38 +3,53 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <WiFiManager.h> 
+#include <WebSocketsServer.h>
 #include <FS.h>
-
-#define SCRIPTS_PATH "/scripts/"
-#define CSS_PATH "/css/"
+#include "handler.h"
 
 ESP8266WebServer server ( 80 );
+WebSocketsServer webSocket = WebSocketsServer(81);
+MyHandlerJavascript handlerJS;
+MyHandlerCSS handlerCSS;
 
-class MyHandlerJavascript : public RequestHandler {
- bool canHandle(HTTPMethod method, String uri) {
-   return uri !=NULL && uri.startsWith(SCRIPTS_PATH) ;
- }
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+    String toPrint;
+    switch(type) {
+        case WStype_DISCONNECTED:
+            toPrint=String(num)+ " Disconnected";
+            Serial.println(toPrint);
+            break;
+        case WStype_CONNECTED:
+            {
+                IPAddress ip = webSocket.remoteIP(num);
+                toPrint=String(num)+ " Connected from "+ip[0]+"."+ ip[1]+"."+ ip[2]+"."+ ip[3];
+                Serial.println(toPrint);
+				
+				// send message to client
+				webSocket.sendTXT(num, "Connected");
+            }
+            break;
+        case WStype_TEXT:
+            //Serial.println(num+" get Text:"+ payload);
 
-  bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {   
-    Serial.println(requestUri);
-    File dataFile = SPIFFS.open(requestUri.c_str(), "r"); 
-    server.send(200,"application/javascript",dataFile.readString());
-    return true;
-  }
-} MyHandlerJavascript;
+            // send message to client
+            // webSocket.sendTXT(num, "message here");
 
-class MyHandlerCSS : public RequestHandler {
- bool canHandle(HTTPMethod method, String uri) {
-   return uri !=NULL && uri.startsWith(CSS_PATH) ;
- }
+            // send data to all connected clients
+            // webSocket.broadcastTXT("message here");
+            break;
+        case WStype_BIN:
+            /*Serial.println(num+" get binary length:"+length);
+            hexdump(payload, length);*/
 
-  bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {   
-    Serial.println(requestUri);
-    File dataFile = SPIFFS.open(requestUri.c_str(), "r"); 
-    server.send(200,"text/css",dataFile.readString());
-    return true;
-  }
-} MyHandlerCSS;
+            // send message to client
+            // webSocket.sendBIN(num, payload, length);
+            break;
+    }
+
+}
+
+
 
 void handleRootSpiffsError() {
   server.send(200, "text/plain", "SPIFFS KO!");
@@ -47,6 +62,9 @@ void setup() {
     WiFiManager wifiManager;
     wifiManager.autoConnect("ChauffeEauConnectAP");
 
+    //si on arrive là c'est qu'on est connecté au reseau
+    
+
     if (!SPIFFS.begin())
   {
     // Serious problem
@@ -55,17 +73,20 @@ void setup() {
     
   } else {
     Serial.println("SPIFFS Mount succesfull");
-    server.addHandler(&MyHandlerJavascript);
-    server.addHandler(&MyHandlerCSS);
+    server.addHandler(&handlerJS);
+    server.addHandler(&handlerCSS );
     server.serveStatic("/", SPIFFS, "/index.html");
   }
   
   server.begin();
   Serial.println ( "HTTP server started" );
+  webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   server.handleClient();
+  webSocket.loop();
   delay(100);
 }
