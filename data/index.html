@@ -1,9 +1,40 @@
 <html>
 
-<head></head>
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./css/style.css" />
+</head>
 
 <body>
     <p>hello World c'est moi</p>
+    <label class="toggle">
+        <input class="toggle-checkbox" type="checkbox">
+        <div class="toggle-switch"></div>
+        <span class="toggle-label">Chauffer</span>
+    </label>
+    <label class="toggle">
+        <input class="toggle-checkbox" type="checkbox">
+        <div class="toggle-switch"></div>
+        <span class="toggle-label">Circuler</span>
+    </label>
+    <label class="toggle">
+        <input class="toggle-checkbox" type="checkbox">
+        <div class="toggle-switch"></div>
+        <span class="toggle-label">Remplir</span>
+    </label>
+    <label class="toggle">
+        <input class="toggle-checkbox" type="checkbox">
+        <div class="toggle-switch"></div>
+        <span class="toggle-label">Vider</span>
+    </label>
+
+    <div class="slider">
+        <input type="range" min="60" max="80" step="1" value="65" class="doubleThumb" />
+        <p class="min">65</p>
+        <p class="max">75</p>
+        <input type="range" min="60" max="80" step="1" value="75" class="doubleThumb" />
+    </div>
+
     <script type="text/javascript" src="./scripts/test.js"></script>
 </body>
 
