@@ -1,5 +1,3 @@
-
-
 #include "handler.h"
 
 bool MyHandlerJavascript::canHandle(HTTPMethod method, String uri) {

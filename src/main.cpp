@@ -2,16 +2,19 @@
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+
 #include <WiFiManager.h> 
 #include <WebSocketsServer.h>
 #include <ArduinoOTA.h>
 #include <FS.h>
 #include "handler.h"
+#include "mqtt.h"
 
 ESP8266WebServer server ( 80 );
 WebSocketsServer webSocket = WebSocketsServer(81);
 MyHandlerJavascript handlerJS;
 MyHandlerCSS handlerCSS;
+
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
     String toPrint;
@@ -49,7 +52,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     }
 
 }
-
 
 
 void handleRootSpiffsError() {
@@ -114,6 +116,10 @@ void setup() {
   Serial.println ( "HTTP server started" );
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
+
+  initMqtt();
+  connectToMqtt();
+
 }
 
 void loop() {
